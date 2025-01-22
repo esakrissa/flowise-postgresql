@@ -1,0 +1,44 @@
+services:
+  flowise:
+    build:
+      context: ./flowise
+      dockerfile: Dockerfile
+    container_name: flowise
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_TYPE=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - FLOWISE_API_URL=http://localhost:3000
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    volumes:
+      - flowise_data:/usr/src/.flowise
+    depends_on:
+      - postgres
+    networks:
+      - network-config
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network-config
+    restart: always
+
+volumes:
+  flowise_data:
+  postgres_data:
+
+networks:
+  network-config:
+    driver: bridge
